@@ -1,0 +1,32 @@
+{
+  "name": "q-json",
+  "version": "0.0.1",
+  "description": "json serializer",
+  "main": "index.ts",
+  "scripts": {
+    "test": "mocha --require ts-node/register test/**/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanqit/q-json.git"
+  },
+  "keywords": [
+    "json",
+    "serialize",
+    "deserialize"
+  ],
+  "author": "sanqit",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sanqit/q-json/issues"
+  },
+  "homepage": "https://github.com/sanqit/q-json#readme",
+  "devDependencies": {
+    "@types/chai": "4.2.15",
+    "@types/mocha": "8.2.0",
+    "chai": "4.3.0",
+    "mocha": "8.3.0",
+    "ts-node": "9.1.1",
+    "typescript": "4.1.5"
+  }
+}
