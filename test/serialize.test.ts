@@ -1,29 +1,86 @@
 import { expect } from 'chai';
 import { serialize } from '../src/serialize';
+import { Child, Parent } from './model';
 
 describe("serialize", () => {
-    const parent1 = { name: "parent1", childs: [] };
-    const child1 = { parent: parent1, name: "child1" };
-    const child2 = { parent: parent1, name: "child2" };
-    parent1.childs = [child1, child2];
+    const parent: Parent = { id: "11111111-1111-1111-1111-111111111111", name: "Parent1" };
+    const child1: Child = { id: "22222222-2222-2222-2222-222222222222", name: "Child1", parentId: parent.id, parent: parent };
+    const child2: Child = { id: "33333333-3333-3333-3333-333333333333", name: "Child2", parentId: parent.id, parent: parent };
+    parent.children = [child1, child2];
 
-    it("child1", () => {
-        expect('{"$id":"1","parent":{"$id":"2","name":"parent1","childs":{"$id":"3","$values":[{"$ref":"1"},{"$id":"4","parent":{"$ref":"2"},"name":"child2"}]}},"name":"child1"}').to.eql(serialize(child1));
+    it("parent", () =>{
+        expect(`{
+    "$id": "1",
+    "id": "11111111-1111-1111-1111-111111111111",
+    "name": "Parent1",
+    "children": {
+        "$id": "2",
+        "$values": [
+            {
+                "$id": "3",
+                "id": "22222222-2222-2222-2222-222222222222",
+                "name": "Child1",
+                "parentId": "11111111-1111-1111-1111-111111111111",
+                "parent": {
+                    "$ref": "1"
+                }
+            },
+            {
+                "$id": "4",
+                "id": "33333333-3333-3333-3333-333333333333",
+                "name": "Child2",
+                "parentId": "11111111-1111-1111-1111-111111111111",
+                "parent": {
+                    "$ref": "1"
+                }
+            }
+        ]
+    }
+}`).to.eql(serialize(parent, {space: 4}));
+    })
+
+    it("children", () => {
+        expect(`{
+    "$id": "1",
+    "$values": [
+        {
+            "$id": "2",
+            "id": "22222222-2222-2222-2222-222222222222",
+            "name": "Child1",
+            "parentId": "11111111-1111-1111-1111-111111111111",
+            "parent": {
+                "$id": "3",
+                "id": "11111111-1111-1111-1111-111111111111",
+                "name": "Parent1",
+                "children": {
+                    "$id": "4",
+                    "$values": [
+                        {
+                            "$ref": "2"
+                        },
+                        {
+                            "$id": "5",
+                            "id": "33333333-3333-3333-3333-333333333333",
+                            "name": "Child2",
+                            "parentId": "11111111-1111-1111-1111-111111111111",
+                            "parent": {
+                                "$ref": "3"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "$ref": "5"
+        }
+    ]
+}`).to.eql(serialize(parent.children, {space: 4}));
     });
 
-    it("child2", () => {
-        expect('{"$id":"1","parent":{"$id":"2","name":"parent1","childs":{"$id":"3","$values":[{"$id":"4","parent":{"$ref":"2"},"name":"child1"},{"$ref":"1"}]}},"name":"child2"}').to.eql(serialize(child2));
-    });
-
-    it("parent1", () =>{
-        expect('{"$id":"1","name":"parent1","childs":{"$id":"2","$values":[{"$id":"3","parent":{"$ref":"1"},"name":"child1"},{"$id":"4","parent":{"$ref":"1"},"name":"child2"}]}}').to.eql(serialize(parent1));
-    });
-
-    it("[child1, child2]", () =>{
-        expect('{"$id":"1","$values":[{"$id":"2","parent":{"$id":"3","name":"parent1","childs":{"$id":"4","$values":[{"$ref":"2"},{"$id":"5","parent":{"$ref":"3"},"name":"child2"}]}},"name":"child1"},{"$ref":"5"}]}').to.eql(serialize([child1, child2]));
-    });
-
-    it("[child1,child2,parent1]", () => {
-        expect('{"$id":"1","$values":[{"$id":"2","parent":{"$id":"3","name":"parent1","childs":{"$id":"4","$values":[{"$ref":"2"},{"$id":"5","parent":{"$ref":"3"},"name":"child2"}]}},"name":"child1"},{"$ref":"5"},{"$ref":"3"}]}').to.eql(serialize([child1, child2, parent1]));
+    it("custom", () => {
+        const c = {a:1, b:[]}
+        c.b.push(c);
+        expect(`{"$id":"1","a":1,"b":{"$id":"2","$values":[{"$ref":"1"}]}}`).to.eql(serialize(c));
     });
 });

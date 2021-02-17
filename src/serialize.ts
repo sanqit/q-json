@@ -1,41 +1,35 @@
-interface JsonOptions{
-    space?: string | number
+interface JsonOptions {
+  space?: string | number
 }
 
 const serialize = (value: any, jsonOptions?: JsonOptions) => {
-    const cache: any = [];
-    return JSON.stringify(
-      value,
-      (key, value) => {
-        if (typeof value === "object" && value !== null) {
-          let ref = 0;
-
-          if (Array.isArray(value)) {
-            if (cache.includes(value)) {
-              return value;
-            }
-            cache.push(value);
-            return { $id: `${cache.length}`, $values: value };
+  const getCircularReplacer = () => {
+    const map = new Map();
+    return (key, value) => {
+      if (typeof value === "object" && value !== null) {
+        const id = `${Array.from(map.keys()).length + 1}`;
+        if (Array.isArray(value)) {
+          if(map.has(value)){
+            return value;
           }
 
-          if (cache.includes(value)) {
-            ref = cache.indexOf(value) + 1;
-            return { $ref: `${ref}` };
+          const newValue = [...value];
+          map.set(newValue, { $id: id, $values: value });
+          return { $id: id, $values: newValue };
+        } else {
+          if (map.has(value)) {
+            return { $ref: `${map.get(value).$id}` };
           }
-
-          if (Array.isArray(value)) {
-            cache.push(value);
-            return { $id: `${cache.length}`, $values: value };
-          } else {
-            // Store value in our collection
-            cache.push(value);
-            return { $id: `${cache.length}`, ...value };
-          }
+          map.set(value, { $id: id, ...value });
+          return { $id: id, ...value }
         }
-        return value;
-      },
-      jsonOptions?.space
-    );
+      }
+      return value;
+    };
+  };
+
+  const json = JSON.stringify(value, getCircularReplacer(), jsonOptions?.space);
+  return json;
 }
 
 export { serialize };

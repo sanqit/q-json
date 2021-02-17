@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
-        "target": "es5",
-        "module": "commonjs",
+        "target": "ES5",
+        "module": "CommonJS",
+        "lib": ["ES2020", "DOM"],
         "sourceMap": true,
         "outDir": "out"
     }

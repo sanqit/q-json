@@ -1,18 +1,22 @@
-const deserialize = <T extends unknown>(text: string): T => {
-    const cache = {} as any;
-    const parsed = JSON.parse(text, (key, value) => {
+const deserialize = <T extends unknown>(json: string): T => {
+    const map = new Map();
+    const parsed = JSON.parse(json, (key, value) => {
         if (typeof value === "object" && value !== null) {
             if (Array.isArray(value)) {
                 return value.map((x) => {
                     if ("$id" in x) {
                         if ("$values" in x) {
                             let { $id, $values } = x;
-                            cache[`"${$id}"`] = $values;
+                            if(!map.has($id)){
+                                map.set($id, $values);
+                            }
                             return { $ref: $id };
                         } else {
                             let { $id, ...val } = x;
-                            cache[`"${$id}"`] = val;
-                            return x;
+                            if(!map.has($id)){
+                                map.set($id, val);
+                            }
+                            return { $ref: $id };
                         }
                     }
                     return x;
@@ -21,12 +25,16 @@ const deserialize = <T extends unknown>(text: string): T => {
                 if ("$id" in value) {
                     if ("$values" in value) {
                         let { $id, $values } = value;
-                        cache[`"${$id}"`] = $values;
+                        if(!map.has($id)){
+                            map.set($id, $values);
+                        }
                         return { $ref: $id };
                     } else {
                         let { $id, ...val } = value;
-                        cache[`"${$id}"`] = val;
-                        return value;
+                        if(!map.has($id)){
+                            map.set($id, val);
+                        }
+                        return { $ref: $id };
                     }
                 }
             }
@@ -37,13 +45,14 @@ const deserialize = <T extends unknown>(text: string): T => {
     const getRef = (obj: any, refContainer: any) => {
         if (typeof obj === "object" && obj !== null) {
             if ("$ref" in obj) {
-                return refContainer[`"${obj.$ref}"`];
+                return refContainer[obj.$ref];
             }
         }
         return obj;
     };
 
-    const replaceRef = (obj: any, refContainer: any) => {
+    const replaceRef = (obj: any, refContainer?: any) => {
+        refContainer ??= obj;
         if (typeof obj === "object" && obj !== null) {
             if ("$ref" in obj) {
                 return getRef(obj, refContainer);
@@ -60,7 +69,7 @@ const deserialize = <T extends unknown>(text: string): T => {
         return obj;
     };
 
-    const replacedCache = replaceRef(cache, cache);
+    const replacedCache = replaceRef(Object.fromEntries(map));
     return replaceRef(parsed, replacedCache);
 }
 
