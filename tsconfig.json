@@ -1,9 +1,13 @@
 {
+    "include": ["src/**/*"],
     "compilerOptions": {
+        "declaration": true,
+        //"emitDeclarationOnly": true,
         "target": "ES5",
         "module": "CommonJS",
         "lib": ["ES2020", "DOM"],
         "sourceMap": true,
-        "outDir": "out"
+        "allowJs": true,
+        "outDir": "dist"
     }
 }

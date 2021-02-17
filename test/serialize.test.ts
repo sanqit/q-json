@@ -4,8 +4,8 @@ import { Child, Parent } from './model';
 
 describe("serialize", () => {
     const parent: Parent = { id: "11111111-1111-1111-1111-111111111111", name: "Parent1" };
-    const child1: Child = { id: "22222222-2222-2222-2222-222222222222", name: "Child1", parentId: parent.id, parent: parent };
-    const child2: Child = { id: "33333333-3333-3333-3333-333333333333", name: "Child2", parentId: parent.id, parent: parent };
+    const child1: Child = { id: "22222222-2222-2222-2222-222222222222", name: "Child1", parentId: parent.id, parent };
+    const child2: Child = { id: "33333333-3333-3333-3333-333333333333", name: "Child2", parentId: parent.id, parent };
     parent.children = [child1, child2];
 
     it("parent", () =>{
